@@ -1,4 +1,4 @@
-package main
+package taskdb
 
 import (
 	"encoding/binary"

@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
 
+	"github.com/mdesson/gophercise-4_todo-cli/taskdb"
 	"github.com/spf13/cobra"
 )
 
@@ -12,7 +13,12 @@ var listCmd = &cobra.Command{
 	Short: "List tasks",
 	Long:  `List all tasks not completed.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("This is a fake \"list\" command.")
+		db, err := taskdb.Init()
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
+		taskdb.ListTasks(db)
 	},
 }
 

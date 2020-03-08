@@ -1,8 +1,10 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
+	"strings"
 
+	"github.com/mdesson/gophercise-4_todo-cli/taskdb"
 	"github.com/spf13/cobra"
 )
 
@@ -12,7 +14,12 @@ var addCmd = &cobra.Command{
 	Short: "Add a task",
 	Long:  `Add a task to your to todo list.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("This is a fake \"add\" command. You wanted to add %v\n", args)
+		db, err := taskdb.Init()
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
+		taskdb.AddTask(db, strings.Join(args, " "))
 	},
 }
 

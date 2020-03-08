@@ -1,8 +1,10 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
+	"strconv"
 
+	"github.com/mdesson/gophercise-4_todo-cli/taskdb"
 	"github.com/spf13/cobra"
 )
 
@@ -12,7 +14,17 @@ var doCmd = &cobra.Command{
 	Short: "Do a task",
 	Long:  `Complete a task.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("This is a fake \"do\" command.")
+		db, err := taskdb.Init()
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
+		key, err := strconv.Atoi(args[0])
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		taskdb.CompleteTask(db, key)
 	},
 }
 
