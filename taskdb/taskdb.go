@@ -8,8 +8,6 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-// TODO: rewrite to use the Task struct
-
 // Task Holds a todo list task
 type Task struct {
 	Desc string
@@ -63,6 +61,10 @@ func AddTask(db *bolt.DB, task string) {
 	}
 }
 
+// TODO: List all (incomplete) tasks
+
+// TODO: Complete task, given a key
+
 // Convert int to byte array (width 8)
 func itob(v int) []byte {
 	b := make([]byte, 8)
@@ -76,4 +78,6 @@ func itob(v int) []byte {
 // 		fmt.Println(err)
 // 	}
 // 	defer db.Close()
+
+// 	AddTask(db, "do the thing1")
 // }
