@@ -1,8 +1,9 @@
-package taskdb
+package main
 
 import (
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/boltdb/bolt"
@@ -61,9 +62,55 @@ func AddTask(db *bolt.DB, task string) {
 	}
 }
 
-// TODO: List all (incomplete) tasks
+// ListTasks Lists all incomplete tasks in database
+func ListTasks(db *bolt.DB) {
+	db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Tasks"))
 
-// TODO: Complete task, given a key
+		// If bucket is empty, notify user none exist
+		if size := b.Sequence(); size == 0 {
+			fmt.Println("No tasks created yet!")
+			return nil
+		}
+
+		b.ForEach(func(k, v []byte) error {
+			var task Task
+			err := json.Unmarshal(v, &task)
+			if !task.Done {
+				fmt.Printf("%v %v\n", task.ID, task.Desc)
+			}
+			return err
+		})
+		return nil
+	})
+}
+
+// CompleteTask Mark existing task as done
+func CompleteTask(db *bolt.DB, key int) {
+	db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("Tasks"))
+
+		// Get existing task, if it exists
+		var task Task
+		taskBin := b.Get(itob(key))
+		if taskBin == nil {
+			fmt.Println("Task not found")
+			return nil
+		}
+		json.Unmarshal(taskBin, &task)
+
+		// Mark task as done and update database
+		task.Done = true
+		buf, err := json.Marshal(task)
+		if err != nil {
+			return err
+		}
+		err = b.Put(itob(key), buf)
+
+		fmt.Println("Task completed")
+		return err
+	})
+}
 
 // Convert int to byte array (width 8)
 func itob(v int) []byte {
@@ -71,13 +118,3 @@ func itob(v int) []byte {
 	binary.BigEndian.PutUint64(b, uint64(v))
 	return b
 }
-
-// func main() {
-// 	db, err := Init()
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-// 	defer db.Close()
-
-// 	AddTask(db, "do the thing1")
-// }
